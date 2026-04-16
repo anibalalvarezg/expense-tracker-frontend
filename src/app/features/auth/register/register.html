@@ -1,0 +1,64 @@
+<div class="min-h-screen bg-gray-100 flex items-center justify-center">
+  <div class="bg-white p-8 rounded-2xl shadow-md w-full max-w-md">
+
+    <h1 class="text-2xl font-bold text-gray-800 mb-2">Crear cuenta</h1>
+    <p class="text-gray-500 mb-6">Empieza a controlar tus gastos</p>
+
+    @if (error()) {
+      <div class="bg-red-50 text-red-600 px-4 py-3 rounded-lg mb-4 text-sm">
+        {{ error() }}
+      </div>
+    }
+
+    <form (ngSubmit)="onSubmit()">
+      <div class="mb-4">
+        <label class="block text-sm font-medium text-gray-700 mb-1">Nombre</label>
+        <input
+          type="text"
+          [ngModel]="name()"
+          (ngModelChange)="name.set($event)"
+          name="name"
+          class="w-full border border-gray-300 rounded-lg px-4 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500"
+          placeholder="Tu nombre"
+          required />
+      </div>
+
+      <div class="mb-4">
+        <label class="block text-sm font-medium text-gray-700 mb-1">Email</label>
+        <input
+          type="email"
+          [ngModel]="email()"
+          (ngModelChange)="email.set($event)"
+          name="email"
+          class="w-full border border-gray-300 rounded-lg px-4 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500"
+          placeholder="tu@email.com"
+          required />
+      </div>
+
+      <div class="mb-6">
+        <label class="block text-sm font-medium text-gray-700 mb-1">Contraseña</label>
+        <input
+          type="password"
+          [ngModel]="password()"
+          (ngModelChange)="password.set($event)"
+          name="password"
+          class="w-full border border-gray-300 rounded-lg px-4 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500"
+          placeholder="Mínimo 6 caracteres"
+          required />
+      </div>
+
+      <button
+        type="submit"
+        [disabled]="loading()"
+        class="w-full bg-blue-600 text-white py-2 rounded-lg font-medium hover:bg-blue-700 transition disabled:opacity-50">
+        @if (loading()) { Cargando... } @else { Registrarse }
+      </button>
+    </form>
+
+    <p class="text-center text-sm text-gray-500 mt-4">
+      ¿Ya tienes cuenta?
+      <a routerLink="/login" class="text-blue-600 hover:underline">Inicia sesión</a>
+    </p>
+
+  </div>
+</div>

@@ -1,0 +1,134 @@
+<div class="min-h-screen bg-gray-100">
+
+  <!-- Navbar -->
+  <nav class="bg-white shadow-sm px-6 py-4 flex justify-between items-center">
+    <h1 class="text-xl font-bold text-blue-600">💰 Expense Tracker</h1>
+    <div class="flex items-center gap-4">
+      <span class="text-gray-600 text-sm">Hola, {{ userName() }}</span>
+      <a routerLink="/expenses" class="text-sm text-blue-600 hover:underline">Gastos</a>
+      <a routerLink="/budget" class="text-sm text-blue-600 hover:underline">Presupuesto</a>
+      <button (click)="logout()"
+              class="text-sm text-red-500 hover:underline">
+        Cerrar sesión
+      </button>
+    </div>
+  </nav>
+
+  <div class="max-w-5xl mx-auto px-6 py-8">
+
+    @if (loading()) {
+      <div class="text-center text-gray-500 py-20">Cargando...</div>
+    } @else {
+
+      <!-- Tarjetas de resumen -->
+      <div class="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
+
+        <!-- Total gastado -->
+        <div class="bg-white rounded-2xl shadow-sm p-6">
+          <p class="text-sm text-gray-500 mb-1">Total gastado</p>
+          <p class="text-3xl font-bold text-gray-800">
+            ${{ summary()?.totalMonth ?? 0 | number:'1.0-0' }}
+          </p>
+          <p class="text-xs text-gray-400 mt-1">Este mes</p>
+        </div>
+
+        <!-- Presupuesto -->
+        @if (budgetStatus()) {
+          <div class="bg-white rounded-2xl shadow-sm p-6">
+            <p class="text-sm text-gray-500 mb-1">Presupuesto</p>
+            <p class="text-3xl font-bold text-gray-800">
+              ${{ budgetStatus()!.budget | number:'1.0-0' }}
+            </p>
+            <p class="text-xs mt-1"
+               [class]="budgetStatus()!.overBudget ? 'text-red-500' : 'text-green-500'">
+              {{ budgetStatus()!.overBudget ? '⚠️ Presupuesto superado' : '✅ Dentro del presupuesto' }}
+            </p>
+          </div>
+
+          <!-- Disponible -->
+          <div class="bg-white rounded-2xl shadow-sm p-6">
+            <p class="text-sm text-gray-500 mb-1">Disponible</p>
+            <p class="text-3xl font-bold"
+               [class]="budgetStatus()!.overBudget ? 'text-red-600' : 'text-green-600'">
+              ${{ budgetStatus()!.available | number:'1.0-0' }}
+            </p>
+            <!-- Barra de progreso -->
+            <div class="mt-2 bg-gray-200 rounded-full h-2">
+              <div class="h-2 rounded-full transition-all"
+                   [class]="budgetStatus()!.overBudget ? 'bg-red-500' : 'bg-green-500'"
+                   [style.width.%]="Math.min(budgetStatus()!.percentageUsed, 100)">
+              </div>
+            </div>
+            <p class="text-xs text-gray-400 mt-1">
+              {{ budgetStatus()!.percentageUsed | number:'1.0-1' }}% usado
+            </p>
+          </div>
+        } @else {
+          <div class="bg-white rounded-2xl shadow-sm p-6 col-span-2
+                      flex items-center justify-center">
+            <a routerLink="/budget"
+               class="text-blue-600 hover:underline text-sm">
+              + Configurar presupuesto del mes
+            </a>
+          </div>
+        }
+
+      </div>
+
+      <!-- Resumen por categoría -->
+      @if (getCategoryEntries().length > 0) {
+        <div class="bg-white rounded-2xl shadow-sm p-6 mb-8">
+          <h2 class="text-lg font-semibold text-gray-800 mb-4">Por categoría</h2>
+          <div class="space-y-3">
+            @for (entry of getCategoryEntries(); track entry[0]) {
+              <div class="flex justify-between items-center">
+                <span class="text-gray-700">{{ entry[0] }}</span>
+                <span class="font-semibold text-gray-800">
+                  ${{ entry[1] | number:'1.0-0' }}
+                </span>
+              </div>
+            }
+          </div>
+        </div>
+      }
+
+      <!-- Últimos gastos -->
+      <div class="bg-white rounded-2xl shadow-sm p-6">
+        <div class="flex justify-between items-center mb-4">
+          <h2 class="text-lg font-semibold text-gray-800">Últimos gastos</h2>
+          <a routerLink="/expenses"
+             class="text-sm text-blue-600 hover:underline">Ver todos</a>
+        </div>
+
+        @if (expenses().length === 0) {
+          <div class="text-center text-gray-400 py-8">
+            <p class="text-4xl mb-2">🧾</p>
+            <p>No hay gastos este mes</p>
+            <a routerLink="/expenses"
+               class="text-blue-600 hover:underline text-sm mt-2 inline-block">
+              + Agregar gasto
+            </a>
+          </div>
+        } @else {
+          <div class="space-y-3">
+            @for (expense of expenses().slice(0, 5); track expense.id) {
+              <div class="flex justify-between items-center py-2
+                          border-b border-gray-100 last:border-0">
+                <div>
+                  <p class="font-medium text-gray-800">
+                    {{ expense.categoryIcon }} {{ expense.description || expense.categoryName }}
+                  </p>
+                  <p class="text-xs text-gray-400">{{ expense.date }}</p>
+                </div>
+                <span class="font-semibold text-gray-800">
+                  ${{ expense.amount | number:'1.0-0' }}
+                </span>
+              </div>
+            }
+          </div>
+        }
+      </div>
+
+    }
+  </div>
+</div>
