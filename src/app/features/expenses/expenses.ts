@@ -4,11 +4,17 @@ import { FormsModule } from '@angular/forms';
 import { ExpenseService, ExpenseResponse, ExpenseRequest } from '../../core/services/expense';
 import { CategoryService, Category } from '../../core/services/category';
 import { HeaderComponent } from '../../shared/components/header/header';
+import { BtnPrimaryDirective } from '../../shared/directives/btn-primary.directive';
+import { BtnGhostDirective } from '../../shared/directives/btn-ghost.directive';
+import { InputDirective } from '../../shared/directives/input.directive';
+import { FieldComponent } from '../../shared/components/field/field';
+import { ChipComponent } from '../../shared/components/chip/chip';
+import { RowComponent } from '../../shared/components/row/row';
 
 @Component({
   selector: 'app-expenses',
   standalone: true,
-  imports: [CommonModule, FormsModule, HeaderComponent],
+  imports: [CommonModule, FormsModule, HeaderComponent, BtnPrimaryDirective, BtnGhostDirective, InputDirective, FieldComponent, ChipComponent, RowComponent],
   templateUrl: './expenses.html'
 })
 export class Expenses implements OnInit {

@@ -5,11 +5,16 @@ import { ExpenseService, ExpenseResponse } from '../../core/services/expense';
 import { BudgetService, BudgetStatusResponse } from '../../core/services/budget';
 import { AuthService } from '../../core/services/auth';
 import { HeaderComponent } from '../../shared/components/header/header';
+import { BtnPrimaryDirective } from '../../shared/directives/btn-primary.directive';
+import { BtnGhostDirective } from '../../shared/directives/btn-ghost.directive';
+import { CellComponent } from '../../shared/components/cell/cell';
+import { SectionComponent } from '../../shared/components/section/section';
+import { RowComponent } from '../../shared/components/row/row';
 
 @Component({
   selector: 'app-dashboard',
   standalone: true,
-  imports: [CommonModule, RouterLink, HeaderComponent],
+  imports: [CommonModule, RouterLink, HeaderComponent, BtnPrimaryDirective, BtnGhostDirective, CellComponent, SectionComponent, RowComponent],
   templateUrl: './dashboard.html'
 })
 export class Dashboard implements OnInit {

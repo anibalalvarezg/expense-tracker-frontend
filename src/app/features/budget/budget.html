@@ -22,19 +22,18 @@
           <div class="text-xs text-red-600 mb-4">{{ error() }}</div>
         }
 
-        <div class="mb-5">
-          <label class="block text-xs font-medium text-mute mb-1.5">Monto del presupuesto</label>
-          <input type="number"
+        <app-field label="Monto del presupuesto" class="mb-5 block">
+          <input appInput type="number"
                  [ngModel]="amount()"
                  (ngModelChange)="amount.set($event)"
                  name="amount"
-                 class="w-full bg-white border border-line rounded-lg px-4 py-2.5 text-sm text-ink placeholder:text-mute-soft focus:outline-none focus:ring-2 focus:ring-brand focus:border-transparent transition"
                  placeholder="0" />
-        </div>
+        </app-field>
 
-        <button (click)="saveBudget()"
+        <button appBtnPrimary
+                (click)="saveBudget()"
                 [disabled]="saving()"
-                class="inline-flex items-center gap-2 bg-brand hover:bg-blue-700 text-white text-sm font-medium rounded-full px-5 py-2 transition-all duration-200 active:scale-[0.98] disabled:opacity-50 disabled:cursor-not-allowed">
+                class="disabled:opacity-50 disabled:cursor-not-allowed">
           {{ saving() ? 'Guardando...' : 'Guardar presupuesto' }}
         </button>
       </div>
@@ -45,21 +44,11 @@
           <h2 class="text-sm font-medium text-ink mb-5">Estado actual</h2>
 
           <div class="bg-surface rounded-xl px-5 py-4 space-y-3 mb-6">
-            <div class="flex items-center justify-between">
-              <span class="text-sm text-ink-soft">Presupuesto</span>
-              <span class="text-sm font-medium text-ink money">$ {{ status()!.budget | number:'1.0-0' }}</span>
-            </div>
-            <div class="flex items-center justify-between">
-              <span class="text-sm text-ink-soft">Gastado</span>
-              <span class="text-sm font-medium text-ink money">$ {{ status()!.spent | number:'1.0-0' }}</span>
-            </div>
-            <div class="flex items-center justify-between">
-              <span class="text-sm text-ink-soft">Disponible</span>
-              <span class="text-sm font-medium money"
-                    [class]="status()!.overBudget ? 'text-red-600' : 'text-emerald-600'">
-                $ {{ status()!.available | number:'1.0-0' }}
-              </span>
-            </div>
+            <app-row label="Presupuesto" [value]="'$ ' + (status()!.budget | number:'1.0-0')" />
+            <app-row label="Gastado" [value]="'$ ' + (status()!.spent | number:'1.0-0')" />
+            <app-row label="Disponible"
+                     [value]="'$ ' + (status()!.available | number:'1.0-0')"
+                     [valueClass]="status()!.overBudget ? 'text-red-600' : 'text-emerald-600'" />
           </div>
 
           <!-- Progress bar -->

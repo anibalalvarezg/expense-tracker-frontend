@@ -2,11 +2,14 @@ import { Component, inject, signal } from '@angular/core';
 import { Router, RouterLink } from '@angular/router';
 import { FormsModule } from '@angular/forms';
 import { AuthService } from '../../../core/services/auth';
+import { BtnPrimaryDirective } from '../../../shared/directives/btn-primary.directive';
+import { InputDirective } from '../../../shared/directives/input.directive';
+import { FieldComponent } from '../../../shared/components/field/field';
 
 @Component({
   selector: 'app-register',
   standalone: true,
-  imports: [FormsModule, RouterLink],
+  imports: [FormsModule, RouterLink, BtnPrimaryDirective, InputDirective, FieldComponent],
   templateUrl: './register.html'
 })
 export class Register {

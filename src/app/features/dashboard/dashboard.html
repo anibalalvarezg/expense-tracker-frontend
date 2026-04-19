@@ -24,14 +24,8 @@
           </button>
         </div>
         <div class="flex items-center gap-3">
-          <a routerLink="/expenses"
-             class="inline-flex items-center gap-2 bg-white hover:bg-slate-50 border border-line text-ink text-sm font-medium rounded-full px-5 py-2 transition-all duration-200 active:scale-[0.98]">
-            + Agregar gasto
-          </a>
-          <a routerLink="/budget"
-             class="inline-flex items-center gap-2 bg-brand hover:bg-blue-700 text-white text-sm font-medium rounded-full px-5 py-2 transition-all duration-200 active:scale-[0.98]">
-            🎯 Presupuesto
-          </a>
+          <a appBtnGhost routerLink="/expenses">+ Agregar gasto</a>
+          <a appBtnPrimary routerLink="/budget">🎯 Presupuesto</a>
         </div>
       </div>
 
@@ -42,10 +36,7 @@
         <div class="col-span-12 lg:col-span-7 space-y-10">
 
           <!-- Gastos del mes por categoría -->
-          <section>
-            <div class="flex items-center justify-between mb-3 px-1">
-              <h2 class="text-xs font-medium text-mute uppercase tracking-wide">Gastos del mes</h2>
-            </div>
+          <app-section label="Gastos del mes">
             @if (categorySummary().length === 0) {
               <div class="text-center py-10 border border-dashed border-line rounded-xl">
                 <p class="text-2xl mb-2">🧾</p>
@@ -57,33 +48,31 @@
             } @else {
               <div class="space-y-2">
                 @for (cat of categorySummary(); track cat.name) {
-                  <a routerLink="/expenses"
-                     class="block bg-white border border-line rounded-xl px-5 py-4 hover:border-slate-300 transition-colors cursor-pointer">
-                    <div class="flex items-center justify-between">
-                      <div class="flex items-center gap-3">
-                        <span class="w-9 h-9 rounded-full flex items-center justify-center text-base"
-                              [style.background]="cat.color + '1A'">{{ cat.icon }}</span>
-                        <div>
-                          <p class="text-sm font-medium text-ink">{{ cat.name }}</p>
-                          <p class="text-xs text-mute mt-0.5">
-                            {{ totalMonth() > 0 ? ((cat.total / totalMonth()) * 100 | number:'1.0-0') : 0 }}% del total
-                          </p>
+                  <a class="block" routerLink="/expenses">
+                    <app-cell [clickable]="true">
+                      <div class="flex items-center justify-between">
+                        <div class="flex items-center gap-3">
+                          <span class="w-9 h-9 rounded-full flex items-center justify-center text-base"
+                                [style.background]="cat.color + '1A'">{{ cat.icon }}</span>
+                          <div>
+                            <p class="text-sm font-medium text-ink">{{ cat.name }}</p>
+                            <p class="text-xs text-mute mt-0.5">
+                              {{ totalMonth() > 0 ? ((cat.total / totalMonth()) * 100 | number:'1.0-0') : 0 }}% del total
+                            </p>
+                          </div>
                         </div>
+                        <span class="text-sm font-medium text-ink money">$ {{ cat.total | number:'1.0-0' }}</span>
                       </div>
-                      <span class="text-sm font-medium text-ink money">$ {{ cat.total | number:'1.0-0' }}</span>
-                    </div>
+                    </app-cell>
                   </a>
                 }
               </div>
             }
-          </section>
+          </app-section>
 
           <!-- Últimos movimientos -->
-          <section>
-            <div class="flex items-center justify-between mb-3 px-1">
-              <h2 class="text-xs font-medium text-mute uppercase tracking-wide">Últimos movimientos</h2>
-              <a routerLink="/expenses" class="text-xs text-brand hover:underline">Ver todos</a>
-            </div>
+          <app-section label="Últimos movimientos">
+            <a action routerLink="/expenses" class="text-xs text-brand hover:underline">Ver todos</a>
             @if (expenses().length === 0) {
               <div class="text-center py-10 border border-dashed border-line rounded-xl">
                 <p class="text-2xl mb-2">🧾</p>
@@ -106,7 +95,7 @@
                 }
               </div>
             }
-          </section>
+          </app-section>
 
         </div>
 
@@ -117,22 +106,12 @@
           <div>
             <h3 class="text-sm font-medium text-ink mb-3">Resumen del mes</h3>
             <div class="bg-surface rounded-xl px-5 py-4 space-y-3">
-              <div class="flex items-center justify-between">
-                <span class="text-sm text-ink-soft">Total gastado</span>
-                <span class="text-sm font-medium text-ink money">$ {{ totalMonth() | number:'1.0-0' }}</span>
-              </div>
+              <app-row label="Total gastado" [value]="'$ ' + (totalMonth() | number:'1.0-0')" />
               @if (budgetStatus()) {
-                <div class="flex items-center justify-between">
-                  <span class="text-sm text-ink-soft">Presupuesto</span>
-                  <span class="text-sm font-medium text-ink money">$ {{ budgetStatus()!.budget | number:'1.0-0' }}</span>
-                </div>
-                <div class="flex items-center justify-between">
-                  <span class="text-sm text-ink-soft">Disponible</span>
-                  <span class="text-sm font-medium money"
-                        [class]="budgetStatus()!.overBudget ? 'text-red-600' : 'text-emerald-600'">
-                    $ {{ budgetStatus()!.available | number:'1.0-0' }}
-                  </span>
-                </div>
+                <app-row label="Presupuesto" [value]="'$ ' + (budgetStatus()!.budget | number:'1.0-0')" />
+                <app-row label="Disponible"
+                         [value]="'$ ' + (budgetStatus()!.available | number:'1.0-0')"
+                         [valueClass]="budgetStatus()!.overBudget ? 'text-red-600' : 'text-emerald-600'" />
               } @else {
                 <div class="flex items-center justify-between">
                   <span class="text-sm text-ink-soft">Presupuesto</span>
