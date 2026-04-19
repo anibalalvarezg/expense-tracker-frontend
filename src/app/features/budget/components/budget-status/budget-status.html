@@ -1,0 +1,33 @@
+<div class="border border-line rounded-2xl p-7">
+  <h2 class="text-sm font-medium text-ink mb-5">Estado actual</h2>
+
+  <div class="bg-surface rounded-xl px-5 py-4 space-y-3 mb-6">
+    <app-row label="Presupuesto" [value]="'$ ' + (status().budget | number:'1.0-0')" />
+    <app-row label="Gastado" [value]="'$ ' + (status().spent | number:'1.0-0')" />
+    <app-row label="Disponible"
+             [value]="'$ ' + (status().available | number:'1.0-0')"
+             [valueClass]="status().overBudget ? 'text-red-600' : 'text-emerald-600'" />
+  </div>
+
+  <!-- Progress bar -->
+  <div class="mb-5 px-1">
+    <div class="flex justify-between text-xs text-mute mb-1.5">
+      <span>Progreso</span>
+      <span class="tabnum">{{ status().percentageUsed | number:'1.0-1' }}%</span>
+    </div>
+    <div class="h-1 bg-slate-100 rounded-full overflow-hidden">
+      <div class="h-1 rounded-full transition-all duration-500"
+           [class]="status().overBudget ? 'bg-red-500' : 'bg-brand'"
+           [style.width.%]="Math.min(status().percentageUsed, 100)">
+      </div>
+    </div>
+  </div>
+
+  @if (status().overBudget) {
+    <p class="text-xs text-red-600 px-1">⚠️ Has superado tu presupuesto mensual</p>
+  } @else if (status().percentageUsed >= 80) {
+    <p class="text-xs text-yellow-600 px-1">⚠️ Has usado más del 80% de tu presupuesto</p>
+  } @else {
+    <p class="text-xs text-emerald-600 px-1">✅ Vas bien, dentro del presupuesto</p>
+  }
+</div>
