@@ -39,6 +39,8 @@ export class Expenses implements OnInit {
   filterFrom = signal('');
   filterTo = signal('');
 
+  exporting = signal(false);
+
   currentYear = new Date().getFullYear();
   currentMonth = new Date().getMonth() + 1;
 
@@ -157,6 +159,29 @@ export class Expenses implements OnInit {
     this.filterCategoryId.set(0);
     this.filterFrom.set('');
     this.filterTo.set('');
+  }
+
+  exportExcel() {
+    const pad = (n: number) => String(n).padStart(2, '0');
+    const startDate = this.filterFrom() ||
+      `${this.currentYear}-${pad(this.currentMonth)}-01`;
+    const lastDay = new Date(this.currentYear, this.currentMonth, 0).getDate();
+    const endDate = this.filterTo() ||
+      `${this.currentYear}-${pad(this.currentMonth)}-${lastDay}`;
+
+    this.exporting.set(true);
+    this.expenseService.export(startDate, endDate).subscribe({
+      next: (blob) => {
+        const url = URL.createObjectURL(blob);
+        const a = document.createElement('a');
+        a.href = url;
+        a.download = `gastos_${startDate}_${endDate}.xlsx`;
+        a.click();
+        URL.revokeObjectURL(url);
+        this.exporting.set(false);
+      },
+      error: () => this.exporting.set(false)
+    });
   }
 
   formatDay(dateStr: string): string {

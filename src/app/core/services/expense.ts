@@ -61,4 +61,11 @@ export class ExpenseService {
   delete(id: number): Observable<void> {
     return this.http.delete<void>(`${this.url}/${id}`);
   }
+
+  export(startDate: string, endDate: string): Observable<Blob> {
+    const params = new HttpParams()
+      .set('startDate', startDate)
+      .set('endDate', endDate);
+    return this.http.get(`${this.url}/export`, { params, responseType: 'blob' });
+  }
 }

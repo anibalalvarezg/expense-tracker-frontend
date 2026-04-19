@@ -14,7 +14,15 @@
           <span class="money font-medium text-ink-soft">$ {{ filteredTotal() | number:'1.0-0' }}</span>
         </p>
       </div>
-      <button appBtnPrimary (click)="openForm()">+ Agregar gasto</button>
+      <div class="flex items-center gap-3">
+        <button appBtnGhost
+                (click)="exportExcel()"
+                [disabled]="exporting()"
+                class="disabled:opacity-50 disabled:cursor-not-allowed">
+          {{ exporting() ? 'Exportando...' : '⬇ Exportar Excel' }}
+        </button>
+        <button appBtnPrimary (click)="openForm()">+ Agregar gasto</button>
+      </div>
     </div>
 
     <!-- Inline form -->
