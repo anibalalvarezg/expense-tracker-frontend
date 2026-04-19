@@ -1,8 +1,4 @@
-<div class="min-h-screen bg-white">
-
-  <app-header />
-
-  @if (loading()) {
+@if (loading()) {
     <div class="text-center text-mute-soft py-20">Cargando...</div>
   } @else {
 
@@ -33,129 +29,20 @@
       <div class="grid grid-cols-12 gap-10">
 
         <!-- Left: category breakdown + recents -->
-        <div class="col-span-12 lg:col-span-7 space-y-10">
-
-          <!-- Gastos del mes por categoría -->
-          <app-section label="Gastos del mes">
-            @if (categorySummary().length === 0) {
-              <div class="text-center py-10 border border-dashed border-line rounded-xl">
-                <p class="text-2xl mb-2">🧾</p>
-                <p class="text-sm text-mute">No hay gastos este mes</p>
-                <a routerLink="/expenses" class="text-xs text-brand hover:underline mt-2 inline-block">
-                  + Agregar gasto
-                </a>
-              </div>
-            } @else {
-              <div class="space-y-2">
-                @for (cat of categorySummary(); track cat.name) {
-                  <a class="block" routerLink="/expenses">
-                    <app-cell [clickable]="true">
-                      <div class="flex items-center justify-between">
-                        <div class="flex items-center gap-3">
-                          <span class="w-9 h-9 rounded-full flex items-center justify-center text-base"
-                                [style.background]="cat.color + '1A'">{{ cat.icon }}</span>
-                          <div>
-                            <p class="text-sm font-medium text-ink">{{ cat.name }}</p>
-                            <p class="text-xs text-mute mt-0.5">
-                              {{ totalMonth() > 0 ? ((cat.total / totalMonth()) * 100 | number:'1.0-0') : 0 }}% del total
-                            </p>
-                          </div>
-                        </div>
-                        <span class="text-sm font-medium text-ink money">$ {{ cat.total | number:'1.0-0' }}</span>
-                      </div>
-                    </app-cell>
-                  </a>
-                }
-              </div>
-            }
-          </app-section>
-
-          <!-- Últimos movimientos -->
-          <app-section label="Últimos movimientos">
-            <a action routerLink="/expenses" class="text-xs text-brand hover:underline">Ver todos</a>
-            @if (expenses().length === 0) {
-              <div class="text-center py-10 border border-dashed border-line rounded-xl">
-                <p class="text-2xl mb-2">🧾</p>
-                <p class="text-sm text-mute">No hay gastos este mes</p>
-              </div>
-            } @else {
-              <div class="border border-line rounded-xl divide-y divide-line overflow-hidden">
-                @for (expense of expenses().slice(0, 5); track expense.id) {
-                  <div class="flex items-center justify-between px-5 py-3.5 hover:bg-slate-50/60 transition-colors">
-                    <div class="flex items-center gap-3">
-                      <span class="w-7 h-7 rounded-full flex items-center justify-center text-xs"
-                            [style.background]="expense.categoryColor + '1A'">{{ expense.categoryIcon }}</span>
-                      <div>
-                        <p class="text-sm text-ink">{{ expense.description || expense.categoryName }}</p>
-                        <p class="text-[11px] text-mute-soft mt-0.5">{{ expense.date }}</p>
-                      </div>
-                    </div>
-                    <span class="text-sm text-ink money">$ {{ expense.amount | number:'1.0-0' }}</span>
-                  </div>
-                }
-              </div>
-            }
-          </app-section>
-
+        <div class="col-span-12 lg:col-span-7 flex flex-col gap-8">
+          <app-month-expenses [categorySummary]="categorySummary()" [totalMonth]="totalMonth()" />
+          <app-recent-movements [expenses]="expenses()" />
         </div>
 
         <!-- Right: summary + category mini-list -->
-        <div class="col-span-12 lg:col-span-5 space-y-8">
-
-          <!-- Resumen del mes -->
-          <div>
-            <h3 class="text-sm font-medium text-ink mb-3">Resumen del mes</h3>
-            <div class="bg-surface rounded-xl px-5 py-4 space-y-3">
-              <app-row label="Total gastado" [value]="'$ ' + (totalMonth() | number:'1.0-0')" />
-              @if (budgetStatus()) {
-                <app-row label="Presupuesto" [value]="'$ ' + (budgetStatus()!.budget | number:'1.0-0')" />
-                <app-row label="Disponible"
-                         [value]="'$ ' + (budgetStatus()!.available | number:'1.0-0')"
-                         [valueClass]="budgetStatus()!.overBudget ? 'text-red-600' : 'text-emerald-600'" />
-              } @else {
-                <div class="flex items-center justify-between">
-                  <span class="text-sm text-ink-soft">Presupuesto</span>
-                  <a routerLink="/budget" class="text-xs text-brand hover:underline">+ Configurar</a>
-                </div>
-              }
-            </div>
-            @if (budgetStatus()) {
-              <div class="mt-4 px-1">
-                <div class="flex justify-between text-xs text-mute mb-1.5">
-                  <span>Progreso</span>
-                  <span class="tabnum">{{ budgetStatus()!.percentageUsed | number:'1.0-1' }}%</span>
-                </div>
-                <div class="h-1 bg-slate-100 rounded-full overflow-hidden">
-                  <div class="h-1 rounded-full transition-all duration-500"
-                       [class]="budgetStatus()!.overBudget ? 'bg-red-500' : 'bg-brand'"
-                       [style.width.%]="Math.min(budgetStatus()!.percentageUsed, 100)">
-                  </div>
-                </div>
-              </div>
-            }
-          </div>
-
-          <!-- Por categoría -->
-          @if (categorySummary().length > 0) {
-            <div>
-              <h3 class="text-sm font-medium text-ink mb-3">Por categoría</h3>
-              <div class="bg-surface rounded-xl px-5 py-4 space-y-3">
-                @for (cat of categorySummary().slice(0, 4); track cat.name) {
-                  <div class="flex items-center justify-between">
-                    <span class="flex items-center gap-2 text-sm text-ink-soft">
-                      <span class="w-1.5 h-1.5 rounded-full" [style.background]="cat.color"></span>
-                      {{ cat.name }}
-                    </span>
-                    <span class="text-sm text-ink money">$ {{ cat.total | number:'1.0-0' }}</span>
-                  </div>
-                }
-              </div>
-            </div>
-          }
-
+        <div class="col-span-12 lg:col-span-5">
+          <app-month-summary
+            [totalMonth]="totalMonth()"
+            [budgetStatus]="budgetStatus()"
+            [categorySummary]="categorySummary()" />
         </div>
+
       </div>
     </div>
 
   }
-</div>

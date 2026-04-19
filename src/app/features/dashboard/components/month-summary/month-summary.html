@@ -1,0 +1,54 @@
+<div class="space-y-8">
+
+  <!-- Resumen del mes -->
+  <div>
+    <h3 class="text-sm font-medium text-ink mb-3">Resumen del mes</h3>
+    <div class="bg-surface rounded-xl px-5 py-4 space-y-3">
+      <app-row label="Total gastado" [value]="'$ ' + (totalMonth() | number:'1.0-0')" />
+      @if (budgetStatus()) {
+        <app-row label="Presupuesto" [value]="'$ ' + (budgetStatus()!.budget | number:'1.0-0')" />
+        <app-row label="Disponible"
+                 [value]="'$ ' + (budgetStatus()!.available | number:'1.0-0')"
+                 [valueClass]="budgetStatus()!.overBudget ? 'text-red-600' : 'text-emerald-600'" />
+      } @else {
+        <div class="flex items-center justify-between">
+          <span class="text-sm text-ink-soft">Presupuesto</span>
+          <a routerLink="/budget" class="text-xs text-brand hover:underline">+ Configurar</a>
+        </div>
+      }
+    </div>
+    @if (budgetStatus()) {
+      <div class="mt-4 px-1">
+        <div class="flex justify-between text-xs text-mute mb-1.5">
+          <span>Progreso</span>
+          <span class="tabnum">{{ budgetStatus()!.percentageUsed | number:'1.0-1' }}%</span>
+        </div>
+        <div class="h-1 bg-slate-100 rounded-full overflow-hidden">
+          <div class="h-1 rounded-full transition-all duration-500"
+               [class]="budgetStatus()!.overBudget ? 'bg-red-500' : 'bg-brand'"
+               [style.width.%]="Math.min(budgetStatus()!.percentageUsed, 100)">
+          </div>
+        </div>
+      </div>
+    }
+  </div>
+
+  <!-- Por categoría -->
+  @if (categorySummary().length > 0) {
+    <div>
+      <h3 class="text-sm font-medium text-ink mb-3">Por categoría</h3>
+      <div class="bg-surface rounded-xl px-5 py-4 space-y-3">
+        @for (cat of categorySummary().slice(0, 4); track cat.name) {
+          <div class="flex items-center justify-between">
+            <span class="flex items-center gap-2 text-sm text-ink-soft">
+              <span class="w-1.5 h-1.5 rounded-full" [style.background]="cat.color"></span>
+              {{ cat.name }}
+            </span>
+            <span class="text-sm text-ink money">$ {{ cat.total | number:'1.0-0' }}</span>
+          </div>
+        }
+      </div>
+    </div>
+  }
+
+</div>

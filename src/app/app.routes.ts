@@ -1,5 +1,6 @@
 import { Routes } from '@angular/router';
 import { authGuard } from './core/guards/auth-guard';
+import { MainLayout } from './shared/components/main-layout/main-layout';
 
 export const routes: Routes = [
   {
@@ -18,22 +19,26 @@ export const routes: Routes = [
       .then(m => m.Register)
   },
   {
-    path: 'dashboard',
-    loadComponent: () => import('./features/dashboard/dashboard')
-      .then(m => m.Dashboard),
-    canActivate: [authGuard]
-  },
-  {
-    path: 'expenses',
-    loadComponent: () => import('./features/expenses/expenses')
-      .then(m => m.Expenses),
-    canActivate: [authGuard]
-  },
-  {
-    path: 'budget',
-    loadComponent: () => import('./features/budget/budget')
-      .then(m => m.Budget),
-    canActivate: [authGuard]
+    path: '',
+    component: MainLayout,
+    canActivate: [authGuard],
+    children: [
+      {
+        path: 'dashboard',
+        loadComponent: () => import('./features/dashboard/dashboard')
+          .then(m => m.Dashboard)
+      },
+      {
+        path: 'expenses',
+        loadComponent: () => import('./features/expenses/expenses')
+          .then(m => m.Expenses)
+      },
+      {
+        path: 'budget',
+        loadComponent: () => import('./features/budget/budget')
+          .then(m => m.Budget)
+      }
+    ]
   },
   {
     path: '**',

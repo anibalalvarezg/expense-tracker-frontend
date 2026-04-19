@@ -2,7 +2,6 @@ import { Component, inject, signal, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { BudgetService, BudgetStatusResponse } from '../../core/services/budget';
-import { HeaderComponent } from '../../shared/components/header/header';
 import { BtnPrimaryDirective } from '../../shared/directives/btn-primary.directive';
 import { InputDirective } from '../../shared/directives/input.directive';
 import { FieldComponent } from '../../shared/components/field/field';
@@ -11,7 +10,7 @@ import { RowComponent } from '../../shared/components/row/row';
 @Component({
   selector: 'app-budget',
   standalone: true,
-  imports: [CommonModule, FormsModule, HeaderComponent, BtnPrimaryDirective, InputDirective, FieldComponent, RowComponent],
+  imports: [CommonModule, FormsModule, BtnPrimaryDirective, InputDirective, FieldComponent, RowComponent],
   templateUrl: './budget.html'
 })
 export class Budget implements OnInit {

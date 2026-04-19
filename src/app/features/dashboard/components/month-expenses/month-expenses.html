@@ -1,0 +1,33 @@
+<app-section label="Gastos del mes">
+  @if (categorySummary().length === 0) {
+    <div class="text-center py-10 border border-dashed border-line rounded-xl">
+      <p class="text-2xl mb-2">🧾</p>
+      <p class="text-sm text-mute">No hay gastos este mes</p>
+      <a routerLink="/expenses" class="text-xs text-brand hover:underline mt-2 inline-block">
+        + Agregar gasto
+      </a>
+    </div>
+  } @else {
+    <div class="space-y-2">
+      @for (cat of categorySummary(); track cat.name) {
+        <a class="block" routerLink="/expenses">
+          <app-cell [clickable]="true">
+            <div class="flex items-center justify-between">
+              <div class="flex items-center gap-3">
+                <span class="w-9 h-9 rounded-full flex items-center justify-center text-base"
+                      [style.background]="cat.color + '1A'">{{ cat.icon }}</span>
+                <div>
+                  <p class="text-sm font-medium text-ink">{{ cat.name }}</p>
+                  <p class="text-xs text-mute mt-0.5">
+                    {{ totalMonth() > 0 ? ((cat.total / totalMonth()) * 100 | number:'1.0-0') : 0 }}% del total
+                  </p>
+                </div>
+              </div>
+              <span class="text-sm font-medium text-ink money">$ {{ cat.total | number:'1.0-0' }}</span>
+            </div>
+          </app-cell>
+        </a>
+      }
+    </div>
+  }
+</app-section>

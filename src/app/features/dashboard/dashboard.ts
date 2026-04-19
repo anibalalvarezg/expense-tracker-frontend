@@ -1,27 +1,25 @@
 import { Component, inject, signal, OnInit, computed } from '@angular/core';
 import { RouterLink } from '@angular/router';
-import { CommonModule } from '@angular/common';
 import { ExpenseService, ExpenseResponse } from '../../core/services/expense';
 import { BudgetService, BudgetStatusResponse } from '../../core/services/budget';
 import { AuthService } from '../../core/services/auth';
-import { HeaderComponent } from '../../shared/components/header/header';
 import { BtnPrimaryDirective } from '../../shared/directives/btn-primary.directive';
 import { BtnGhostDirective } from '../../shared/directives/btn-ghost.directive';
-import { CellComponent } from '../../shared/components/cell/cell';
-import { SectionComponent } from '../../shared/components/section/section';
-import { RowComponent } from '../../shared/components/row/row';
+import { MonthExpensesComponent } from './components/month-expenses/month-expenses';
+import { RecentMovementsComponent } from './components/recent-movements/recent-movements';
+import { MonthSummaryComponent } from './components/month-summary/month-summary';
+import { CategorySummary } from './dashboard.types';
 
 @Component({
   selector: 'app-dashboard',
   standalone: true,
-  imports: [CommonModule, RouterLink, HeaderComponent, BtnPrimaryDirective, BtnGhostDirective, CellComponent, SectionComponent, RowComponent],
+  imports: [RouterLink, BtnPrimaryDirective, BtnGhostDirective, MonthExpensesComponent, RecentMovementsComponent, MonthSummaryComponent],
   templateUrl: './dashboard.html'
 })
 export class Dashboard implements OnInit {
   private authService = inject(AuthService);
   private expenseService = inject(ExpenseService);
   private budgetService = inject(BudgetService);
-  Math = Math;
 
   userName = signal(this.authService.getUserName());
   expenses = signal<ExpenseResponse[]>([]);
@@ -45,8 +43,8 @@ export class Dashboard implements OnInit {
     return `${this.MONTHS[now.getMonth()]} ${now.getFullYear()} · ${count} ${moves}`;
   });
 
-  categorySummary = computed(() => {
-    const map = new Map<string, { name: string; icon: string; color: string; total: number }>();
+  categorySummary = computed<CategorySummary[]>(() => {
+    const map = new Map<string, CategorySummary>();
     for (const e of this.expenses()) {
       if (!map.has(e.categoryName)) {
         map.set(e.categoryName, { name: e.categoryName, icon: e.categoryIcon, color: e.categoryColor, total: 0 });
