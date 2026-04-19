@@ -1,5 +1,4 @@
 import { Component, inject, signal, OnInit } from '@angular/core';
-import { RouterLink } from '@angular/router';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { BudgetService, BudgetStatusResponse } from '../../core/services/budget';
@@ -8,7 +7,7 @@ import { HeaderComponent } from '../../shared/components/header/header';
 @Component({
   selector: 'app-budget',
   standalone: true,
-  imports: [CommonModule, RouterLink, FormsModule, HeaderComponent],
+  imports: [CommonModule, FormsModule, HeaderComponent],
   templateUrl: './budget.html'
 })
 export class Budget implements OnInit {
@@ -30,6 +29,7 @@ export class Budget implements OnInit {
   ngOnInit() {
     this.loadStatus();
   }
+
 
   loadStatus() {
     this.loading.set(true);

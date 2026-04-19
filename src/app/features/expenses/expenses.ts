@@ -1,5 +1,4 @@
 import { Component, inject, signal, OnInit, computed } from '@angular/core';
-import { RouterLink } from '@angular/router';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { ExpenseService, ExpenseResponse, ExpenseRequest } from '../../core/services/expense';
@@ -9,7 +8,7 @@ import { HeaderComponent } from '../../shared/components/header/header';
 @Component({
   selector: 'app-expenses',
   standalone: true,
-  imports: [CommonModule, RouterLink, FormsModule, HeaderComponent],
+  imports: [CommonModule, FormsModule, HeaderComponent],
   templateUrl: './expenses.html'
 })
 export class Expenses implements OnInit {
