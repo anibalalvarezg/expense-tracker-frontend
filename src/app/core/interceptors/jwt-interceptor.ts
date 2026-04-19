@@ -16,9 +16,9 @@ export const jwtInterceptor: HttpInterceptorFn = (req: HttpRequest<unknown>, nex
 
   return next(authReq).pipe(
     catchError((error: HttpErrorResponse) => {
+      const isAuthEndpoint = req.url.includes('/auth/');
 
-      // Si el token expiró → intenta renovarlo
-      if (error.status === 401) {
+      if ((error.status === 401 || error.status === 403) && !isAuthEndpoint) {
         return authService.refresh().pipe(
           switchMap(() => {
             // Reintenta el request original con el nuevo token
