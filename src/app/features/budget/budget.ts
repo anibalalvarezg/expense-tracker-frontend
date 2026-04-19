@@ -1,20 +1,18 @@
 import { Component, inject, signal, OnInit } from '@angular/core';
-import { Router, RouterLink } from '@angular/router';
+import { RouterLink } from '@angular/router';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { BudgetService, BudgetStatusResponse } from '../../core/services/budget';
-import { AuthService } from '../../core/services/auth';
+import { HeaderComponent } from '../../shared/components/header/header';
 
 @Component({
   selector: 'app-budget',
   standalone: true,
-  imports: [CommonModule, RouterLink, FormsModule],
+  imports: [CommonModule, RouterLink, FormsModule, HeaderComponent],
   templateUrl: './budget.html'
 })
 export class Budget implements OnInit {
   private budgetService = inject(BudgetService);
-  private authService = inject(AuthService);
-  private router = inject(Router);
 
   status = signal<BudgetStatusResponse | null>(null);
   loading = signal(true);
@@ -70,8 +68,4 @@ export class Budget implements OnInit {
 
   Math = Math;
 
-  logout() {
-    this.authService.logout();
-    this.router.navigate(['/login']);
-  }
 }

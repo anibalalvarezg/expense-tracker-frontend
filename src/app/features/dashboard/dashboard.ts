@@ -1,21 +1,21 @@
 import { Component, inject, signal, OnInit, computed } from '@angular/core';
-import { Router, RouterLink } from '@angular/router';
+import { RouterLink } from '@angular/router';
 import { CommonModule } from '@angular/common';
-import { AuthService } from '../../core/services/auth';
 import { ExpenseService, ExpenseResponse } from '../../core/services/expense';
 import { BudgetService, BudgetStatusResponse } from '../../core/services/budget';
+import { AuthService } from '../../core/services/auth';
+import { HeaderComponent } from '../../shared/components/header/header';
 
 @Component({
   selector: 'app-dashboard',
   standalone: true,
-  imports: [CommonModule, RouterLink],
+  imports: [CommonModule, RouterLink, HeaderComponent],
   templateUrl: './dashboard.html'
 })
 export class Dashboard implements OnInit {
   private authService = inject(AuthService);
   private expenseService = inject(ExpenseService);
   private budgetService = inject(BudgetService);
-  private router = inject(Router);
   Math = Math;
 
   userName = signal(this.authService.getUserName());
@@ -72,8 +72,4 @@ export class Dashboard implements OnInit {
     });
   }
 
-  logout() {
-    this.authService.logout();
-    this.router.navigate(['/login']);
-  }
 }

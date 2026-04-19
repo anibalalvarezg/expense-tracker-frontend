@@ -1,0 +1,30 @@
+<header class="sticky top-0 z-30 bg-white/80 backdrop-blur-md border-b border-line">
+  <div class="max-w-6xl mx-auto px-8 h-14 flex items-center justify-between">
+    <a routerLink="/dashboard" class="flex items-center gap-2">
+      <span class="text-brand text-lg">◆</span>
+      <span class="font-semibold tracking-tight text-ink">Expense</span>
+    </a>
+    <nav class="flex items-center gap-7">
+      <a routerLink="/dashboard"
+         routerLinkActive="text-ink font-medium"
+         [routerLinkActiveOptions]="{ exact: true }"
+         class="flex items-center gap-1.5 text-sm text-mute transition-colors">
+        <span class="text-base opacity-80">📊</span> Inicio
+      </a>
+      <a routerLink="/expenses"
+         routerLinkActive="text-ink font-medium"
+         class="flex items-center gap-1.5 text-sm text-mute transition-colors">
+        <span class="text-base opacity-80">📥</span> Gastos
+      </a>
+      <a routerLink="/budget"
+         routerLinkActive="text-ink font-medium"
+         class="flex items-center gap-1.5 text-sm text-mute transition-colors">
+        <span class="text-base opacity-80">🎯</span> Presupuesto
+      </a>
+      <button (click)="logout()"
+              class="text-sm text-mute hover:text-red-500 transition-colors">
+        Cerrar sesión
+      </button>
+    </nav>
+  </div>
+</header>

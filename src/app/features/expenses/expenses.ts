@@ -1,22 +1,20 @@
 import { Component, inject, signal, OnInit, computed } from '@angular/core';
-import { Router, RouterLink } from '@angular/router';
+import { RouterLink } from '@angular/router';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { ExpenseService, ExpenseResponse, ExpenseRequest } from '../../core/services/expense';
 import { CategoryService, Category } from '../../core/services/category';
-import { AuthService } from '../../core/services/auth';
+import { HeaderComponent } from '../../shared/components/header/header';
 
 @Component({
   selector: 'app-expenses',
   standalone: true,
-  imports: [CommonModule, RouterLink, FormsModule],
+  imports: [CommonModule, RouterLink, FormsModule, HeaderComponent],
   templateUrl: './expenses.html'
 })
 export class Expenses implements OnInit {
   private expenseService = inject(ExpenseService);
   private categoryService = inject(CategoryService);
-  private authService = inject(AuthService);
-  private router = inject(Router);
 
   expenses = signal<ExpenseResponse[]>([]);
   categories = signal<Category[]>([]);
@@ -148,11 +146,6 @@ export class Expenses implements OnInit {
   closeForm() {
     this.showForm.set(false);
     this.error.set('');
-  }
-
-  logout() {
-    this.authService.logout();
-    this.router.navigate(['/login']);
   }
 
   clearFilters() {
