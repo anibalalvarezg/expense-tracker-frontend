@@ -1,9 +1,10 @@
-import { Component, inject, signal, OnInit } from '@angular/core';
-import { RouterLink } from '@angular/router';
+import { Component, inject, signal, OnInit, computed } from '@angular/core';
+import { Router, RouterLink } from '@angular/router';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { ExpenseService, ExpenseResponse, ExpenseRequest } from '../../core/services/expense';
 import { CategoryService, Category } from '../../core/services/category';
+import { AuthService } from '../../core/services/auth';
 
 @Component({
   selector: 'app-expenses',
@@ -14,6 +15,8 @@ import { CategoryService, Category } from '../../core/services/category';
 export class Expenses implements OnInit {
   private expenseService = inject(ExpenseService);
   private categoryService = inject(CategoryService);
+  private authService = inject(AuthService);
+  private router = inject(Router);
 
   expenses = signal<ExpenseResponse[]>([]);
   categories = signal<Category[]>([]);
@@ -22,14 +25,53 @@ export class Expenses implements OnInit {
   editingId = signal<number | null>(null);
   error = signal('');
 
-  // Formulario
+  // Form fields
   amount = signal(0);
   categoryId = signal(0);
   description = signal('');
   date = signal(new Date().toISOString().split('T')[0]);
 
+  // Filters
+  filterCategoryId = signal(0);
+  filterFrom = signal('');
+  filterTo = signal('');
+
   currentYear = new Date().getFullYear();
   currentMonth = new Date().getMonth() + 1;
+
+  private readonly MONTHS = [
+    'enero','febrero','marzo','abril','mayo','junio',
+    'julio','agosto','septiembre','octubre','noviembre','diciembre'
+  ];
+
+  filteredExpenses = computed(() => {
+    const catId = this.filterCategoryId();
+    const cat = catId ? this.categories().find(c => c.id === catId) : null;
+    return this.expenses().filter(e => {
+      if (cat && e.categoryName !== cat.name) return false;
+      if (this.filterFrom() && e.date < this.filterFrom()) return false;
+      if (this.filterTo() && e.date > this.filterTo()) return false;
+      return true;
+    });
+  });
+
+  expenseGroups = computed(() => {
+    const sorted = [...this.filteredExpenses()].sort((a, b) => b.date.localeCompare(a.date));
+    const map = new Map<string, ExpenseResponse[]>();
+    for (const e of sorted) {
+      if (!map.has(e.date)) map.set(e.date, []);
+      map.get(e.date)!.push(e);
+    }
+    return Array.from(map.entries()).map(([date, items]) => ({
+      date,
+      label: this.formatDay(date),
+      total: items.reduce((s, e) => s + e.amount, 0),
+      items
+    }));
+  });
+
+  filteredTotal = computed(() => this.filteredExpenses().reduce((s, e) => s + e.amount, 0));
+  hasFilters = computed(() => this.filterCategoryId() !== 0 || this.filterFrom() !== '' || this.filterTo() !== '');
 
   ngOnInit() {
     this.loadExpenses();
@@ -38,21 +80,19 @@ export class Expenses implements OnInit {
 
   loadExpenses() {
     this.loading.set(true);
-    this.expenseService.getByMonth(this.currentYear, this.currentMonth)
-      .subscribe({
-        next: (data) => {
-          this.expenses.set(data);
-          this.loading.set(false);
-        },
-        error: () => this.loading.set(false)
-      });
+    this.expenseService.getByMonth(this.currentYear, this.currentMonth).subscribe({
+      next: (data) => {
+        this.expenses.set(data);
+        this.loading.set(false);
+      },
+      error: () => this.loading.set(false)
+    });
   }
 
   loadCategories() {
-    this.categoryService.getAll()
-      .subscribe({
-        next: (data) => this.categories.set(data)
-      });
+    this.categoryService.getAll().subscribe({
+      next: (data) => this.categories.set(data)
+    });
   }
 
   openForm() {
@@ -61,6 +101,7 @@ export class Expenses implements OnInit {
     this.categoryId.set(0);
     this.description.set('');
     this.date.set(new Date().toISOString().split('T')[0]);
+    this.error.set('');
     this.showForm.set(true);
   }
 
@@ -69,9 +110,9 @@ export class Expenses implements OnInit {
     this.amount.set(expense.amount);
     this.description.set(expense.description || '');
     this.date.set(expense.date);
-    // buscar el id de la categoría
     const cat = this.categories().find(c => c.name === expense.categoryName);
     this.categoryId.set(cat?.id || 0);
+    this.error.set('');
     this.showForm.set(true);
   }
 
@@ -107,5 +148,21 @@ export class Expenses implements OnInit {
   closeForm() {
     this.showForm.set(false);
     this.error.set('');
+  }
+
+  logout() {
+    this.authService.logout();
+    this.router.navigate(['/login']);
+  }
+
+  clearFilters() {
+    this.filterCategoryId.set(0);
+    this.filterFrom.set('');
+    this.filterTo.set('');
+  }
+
+  formatDay(dateStr: string): string {
+    const [, m, d] = dateStr.split('-').map(Number);
+    return `${d} ${this.MONTHS[m - 1]}`;
   }
 }

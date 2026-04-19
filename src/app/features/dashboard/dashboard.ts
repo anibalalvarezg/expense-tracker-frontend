@@ -1,8 +1,8 @@
-import { Component, inject, signal, OnInit } from '@angular/core';
+import { Component, inject, signal, OnInit, computed } from '@angular/core';
 import { Router, RouterLink } from '@angular/router';
 import { CommonModule } from '@angular/common';
 import { AuthService } from '../../core/services/auth';
-import { ExpenseService, ExpenseResponse, ExpenseSummaryResponse } from '../../core/services/expense';
+import { ExpenseService, ExpenseResponse } from '../../core/services/expense';
 import { BudgetService, BudgetStatusResponse } from '../../core/services/budget';
 
 @Component({
@@ -20,12 +20,36 @@ export class Dashboard implements OnInit {
 
   userName = signal(this.authService.getUserName());
   expenses = signal<ExpenseResponse[]>([]);
-  summary = signal<ExpenseSummaryResponse | null>(null);
   budgetStatus = signal<BudgetStatusResponse | null>(null);
   loading = signal(true);
 
   currentYear = new Date().getFullYear();
   currentMonth = new Date().getMonth() + 1;
+
+  private readonly MONTHS = [
+    'enero','febrero','marzo','abril','mayo','junio',
+    'julio','agosto','septiembre','octubre','noviembre','diciembre'
+  ];
+
+  totalMonth = computed(() => this.expenses().reduce((s, e) => s + e.amount, 0));
+
+  monthLabel = computed(() => {
+    const count = this.expenses().length;
+    const now = new Date();
+    const moves = count === 1 ? 'movimiento' : 'movimientos';
+    return `${this.MONTHS[now.getMonth()]} ${now.getFullYear()} · ${count} ${moves}`;
+  });
+
+  categorySummary = computed(() => {
+    const map = new Map<string, { name: string; icon: string; color: string; total: number }>();
+    for (const e of this.expenses()) {
+      if (!map.has(e.categoryName)) {
+        map.set(e.categoryName, { name: e.categoryName, icon: e.categoryIcon, color: e.categoryColor, total: 0 });
+      }
+      map.get(e.categoryName)!.total += e.amount;
+    }
+    return Array.from(map.values()).sort((a, b) => b.total - a.total);
+  });
 
   ngOnInit() {
     this.loadData();
@@ -34,39 +58,22 @@ export class Dashboard implements OnInit {
   loadData() {
     this.loading.set(true);
 
-    // Cargar gastos del mes
-    this.expenseService.getByMonth(this.currentYear, this.currentMonth)
-      .subscribe({
-        next: (data) => this.expenses.set(data),
-        error: () => {}
-      });
+    this.expenseService.getByMonth(this.currentYear, this.currentMonth).subscribe({
+      next: (data) => this.expenses.set(data),
+      error: () => {}
+    });
 
-    // Cargar resumen
-    this.expenseService.getSummary(this.currentYear, this.currentMonth)
-      .subscribe({
-        next: (data) => this.summary.set(data),
-        error: () => {}
-      });
-
-    // Cargar estado del presupuesto
-    this.budgetService.getStatus(this.currentYear, this.currentMonth)
-      .subscribe({
-        next: (data) => {
-          this.budgetStatus.set(data);
-          this.loading.set(false);
-        },
-        error: () => this.loading.set(false)
-      });
+    this.budgetService.getStatus(this.currentYear, this.currentMonth).subscribe({
+      next: (data) => {
+        this.budgetStatus.set(data);
+        this.loading.set(false);
+      },
+      error: () => this.loading.set(false)
+    });
   }
 
   logout() {
     this.authService.logout();
     this.router.navigate(['/login']);
-  }
-
-  getCategoryEntries() {
-    const byCategory = this.summary()?.byCategory;
-    if (!byCategory) return [];
-    return Object.entries(byCategory);
   }
 }

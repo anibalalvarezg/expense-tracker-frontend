@@ -1,147 +1,228 @@
-<div class="min-h-screen bg-gray-100">
+<div class="min-h-screen bg-white">
 
-  <!-- Navbar -->
-  <nav class="bg-white shadow-sm px-6 py-4 flex justify-between items-center">
-    <a routerLink="/dashboard" class="text-xl font-bold text-blue-600">
-      💰 Expense Tracker
-    </a>
-    <div class="flex items-center gap-4">
-      <a routerLink="/dashboard" class="text-sm text-blue-600 hover:underline">Dashboard</a>
-      <a routerLink="/budget" class="text-sm text-blue-600 hover:underline">Presupuesto</a>
+  <!-- TopBar -->
+  <header class="sticky top-0 z-30 bg-white/80 backdrop-blur-md border-b border-line">
+    <div class="max-w-6xl mx-auto px-8 h-14 flex items-center justify-between">
+      <a routerLink="/dashboard" class="flex items-center gap-2">
+        <span class="text-brand text-lg">◆</span>
+        <span class="font-semibold tracking-tight text-ink">Expense</span>
+      </a>
+      <nav class="flex items-center gap-7">
+        <a routerLink="/dashboard"
+           class="flex items-center gap-1.5 text-sm text-mute hover:text-ink transition-colors">
+          <span class="text-base opacity-80">📊</span> Inicio
+        </a>
+        <a routerLink="/expenses"
+           class="flex items-center gap-1.5 text-sm text-ink font-medium transition-colors">
+          <span class="text-base opacity-80">📥</span> Gastos
+        </a>
+        <a routerLink="/budget"
+           class="flex items-center gap-1.5 text-sm text-mute hover:text-ink transition-colors">
+          <span class="text-base opacity-80">🎯</span> Presupuesto
+        </a>
+        <button (click)="logout()"
+                class="text-sm text-mute hover:text-red-500 transition-colors">
+          Cerrar sesión
+        </button>
+      </nav>
     </div>
-  </nav>
+  </header>
 
-  <div class="max-w-4xl mx-auto px-6 py-8">
+  <div class="max-w-6xl mx-auto px-8 pt-12 pb-16">
 
-    <!-- Header -->
-    <div class="flex justify-between items-center mb-6">
-      <h1 class="text-2xl font-bold text-gray-800">Mis gastos</h1>
+    <!-- Page header -->
+    <div class="flex items-end justify-between mb-10">
+      <div>
+        <h1 class="text-2xl font-medium text-ink tracking-tight">Mis gastos</h1>
+        <p class="text-sm text-mute mt-1.5">
+          {{ filteredExpenses().length }}
+          {{ filteredExpenses().length === 1 ? 'registro' : 'registros' }} ·
+          <span class="money font-medium text-ink-soft">$ {{ filteredTotal() | number:'1.0-0' }}</span>
+        </p>
+      </div>
       <button (click)="openForm()"
-              class="bg-blue-600 text-white px-4 py-2 rounded-lg text-sm
-               font-medium hover:bg-blue-700 transition">
+              class="inline-flex items-center gap-2 bg-brand hover:bg-blue-700 text-white text-sm font-medium rounded-full px-5 py-2 transition-all duration-200 active:scale-[0.98]">
         + Agregar gasto
       </button>
     </div>
 
-    <!-- Formulario -->
+    <!-- Inline form -->
     @if (showForm()) {
-      <div class="bg-white rounded-2xl shadow-sm p-6 mb-6">
-        <h2 class="text-lg font-semibold text-gray-800 mb-4">
+      <div class="border border-line rounded-2xl p-7 mb-10">
+        <h2 class="text-sm font-medium text-ink mb-5">
           {{ editingId() ? 'Editar gasto' : 'Nuevo gasto' }}
         </h2>
-
         @if (error()) {
-          <div class="bg-red-50 text-red-600 px-4 py-3 rounded-lg mb-4 text-sm">
-            {{ error() }}
-          </div>
+          <div class="text-xs text-red-600 mb-4">{{ error() }}</div>
         }
-
-        <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
-
+        <div class="grid grid-cols-1 md:grid-cols-4 gap-4">
           <div>
-            <label class="block text-sm font-medium text-gray-700 mb-1">Monto</label>
+            <label class="block text-xs font-medium text-mute mb-1.5">Monto</label>
             <input type="number"
                    [ngModel]="amount()"
                    (ngModelChange)="amount.set($event)"
                    name="amount"
-                   class="w-full border border-gray-300 rounded-lg px-4 py-2
-                     focus:outline-none focus:ring-2 focus:ring-blue-500"
+                   class="w-full bg-white border border-line rounded-lg px-4 py-2.5 text-sm text-ink placeholder:text-mute-soft focus:outline-none focus:ring-2 focus:ring-brand focus:border-transparent transition"
                    placeholder="0" />
           </div>
-
           <div>
-            <label class="block text-sm font-medium text-gray-700 mb-1">Categoría</label>
-            <select
-              [ngModel]="categoryId()"
-              (ngModelChange)="categoryId.set(+$event)"
-              name="categoryId"
-              class="w-full border border-gray-300 rounded-lg px-4 py-2
-                     focus:outline-none focus:ring-2 focus:ring-blue-500">
-              <option value="0">Selecciona categoría</option>
+            <label class="block text-xs font-medium text-mute mb-1.5">Categoría</label>
+            <select [ngModel]="categoryId()"
+                    (ngModelChange)="categoryId.set(+$event)"
+                    name="categoryId"
+                    class="w-full bg-white border border-line rounded-lg px-4 py-2.5 text-sm text-ink focus:outline-none focus:ring-2 focus:ring-brand focus:border-transparent transition">
+              <option [value]="0">Selecciona categoría</option>
               @for (cat of categories(); track cat.id) {
                 <option [value]="cat.id">{{ cat.icon }} {{ cat.name }}</option>
               }
             </select>
           </div>
-
           <div>
-            <label class="block text-sm font-medium text-gray-700 mb-1">Descripción</label>
+            <label class="block text-xs font-medium text-mute mb-1.5">Descripción</label>
             <input type="text"
                    [ngModel]="description()"
                    (ngModelChange)="description.set($event)"
                    name="description"
-                   class="w-full border border-gray-300 rounded-lg px-4 py-2
-                     focus:outline-none focus:ring-2 focus:ring-blue-500"
+                   class="w-full bg-white border border-line rounded-lg px-4 py-2.5 text-sm text-ink placeholder:text-mute-soft focus:outline-none focus:ring-2 focus:ring-brand focus:border-transparent transition"
                    placeholder="Opcional" />
           </div>
-
           <div>
-            <label class="block text-sm font-medium text-gray-700 mb-1">Fecha</label>
+            <label class="block text-xs font-medium text-mute mb-1.5">Fecha</label>
             <input type="date"
                    [ngModel]="date()"
                    (ngModelChange)="date.set($event)"
                    name="date"
-                   class="w-full border border-gray-300 rounded-lg px-4 py-2
-                     focus:outline-none focus:ring-2 focus:ring-blue-500" />
+                   class="w-full bg-white border border-line rounded-lg px-4 py-2.5 text-sm text-ink focus:outline-none focus:ring-2 focus:ring-brand focus:border-transparent transition" />
           </div>
-
         </div>
-
         <div class="flex gap-3 mt-6">
           <button (click)="saveExpense()"
-                  class="bg-blue-600 text-white px-6 py-2 rounded-lg text-sm
-                   font-medium hover:bg-blue-700 transition">
+                  class="inline-flex items-center gap-2 bg-brand hover:bg-blue-700 text-white text-sm font-medium rounded-full px-5 py-2 transition-all duration-200 active:scale-[0.98]">
             {{ editingId() ? 'Actualizar' : 'Guardar' }}
           </button>
           <button (click)="closeForm()"
-                  class="bg-gray-100 text-gray-700 px-6 py-2 rounded-lg text-sm
-                   font-medium hover:bg-gray-200 transition">
+                  class="inline-flex items-center gap-2 bg-white hover:bg-slate-50 border border-line text-ink text-sm font-medium rounded-full px-5 py-2 transition-all duration-200 active:scale-[0.98]">
             Cancelar
           </button>
         </div>
       </div>
     }
 
-    <!-- Lista de gastos -->
-    <div class="bg-white rounded-2xl shadow-sm p-6">
-      @if (loading()) {
-        <div class="text-center text-gray-400 py-8">Cargando...</div>
-      } @else if (expenses().length === 0) {
-        <div class="text-center text-gray-400 py-8">
-          <p class="text-4xl mb-2">🧾</p>
-          <p>No hay gastos este mes</p>
-        </div>
-      } @else {
-        <div class="space-y-3">
-          @for (expense of expenses(); track expense.id) {
-            <div class="flex justify-between items-center py-3
-                        border-b border-gray-100 last:border-0">
-              <div>
-                <p class="font-medium text-gray-800">
-                  {{ expense.categoryIcon }} {{ expense.description || expense.categoryName }}
-                </p>
-                <p class="text-xs text-gray-400">
-                  {{ expense.categoryName }} · {{ expense.date }}
-                </p>
-              </div>
-              <div class="flex items-center gap-4">
-                <span class="font-semibold text-gray-800">
-                  ${{ expense.amount | number:'1.0-0' }}
-                </span>
-                <button (click)="editExpense(expense)"
-                        class="text-blue-500 text-sm hover:underline">
-                  Editar
-                </button>
-                <button (click)="deleteExpense(expense.id)"
-                        class="text-red-500 text-sm hover:underline">
-                  Eliminar
-                </button>
-              </div>
-            </div>
+    <div class="grid grid-cols-12 gap-10">
+
+      <!-- Main list -->
+      <div class="col-span-12 lg:col-span-8">
+
+        <!-- Category filter chips -->
+        <div class="flex flex-wrap items-center gap-2 mb-6">
+          <button (click)="filterCategoryId.set(0)"
+                  class="inline-flex items-center gap-1.5 text-xs rounded-full border px-3 py-1.5 transition-all"
+                  [class]="filterCategoryId() === 0
+                    ? 'bg-ink text-white border-ink'
+                    : 'bg-white text-ink-soft border-line hover:border-slate-300'">
+            Todas
+          </button>
+          @for (cat of categories(); track cat.id) {
+            <button (click)="filterCategoryId.set(filterCategoryId() === cat.id ? 0 : cat.id)"
+                    class="inline-flex items-center gap-1.5 text-xs rounded-full border px-3 py-1.5 transition-all"
+                    [class]="filterCategoryId() === cat.id
+                      ? 'bg-ink text-white border-ink'
+                      : 'bg-white text-ink-soft border-line hover:border-slate-300'">
+              @if (filterCategoryId() !== cat.id) {
+                <span class="w-1.5 h-1.5 rounded-full" [style.background]="cat.color"></span>
+              }
+              {{ cat.icon }} {{ cat.name }}
+            </button>
           }
         </div>
-      }
-    </div>
 
+        <!-- Date range filters -->
+        <div class="flex items-center gap-3 mb-8">
+          <input type="date"
+                 [ngModel]="filterFrom()"
+                 (ngModelChange)="filterFrom.set($event)"
+                 name="filterFrom"
+                 class="bg-white border border-line rounded-lg px-4 py-2.5 text-sm text-ink focus:outline-none focus:ring-2 focus:ring-brand focus:border-transparent transition max-w-[180px]" />
+          <span class="text-mute-soft text-sm">→</span>
+          <input type="date"
+                 [ngModel]="filterTo()"
+                 (ngModelChange)="filterTo.set($event)"
+                 name="filterTo"
+                 class="bg-white border border-line rounded-lg px-4 py-2.5 text-sm text-ink focus:outline-none focus:ring-2 focus:ring-brand focus:border-transparent transition max-w-[180px]" />
+          @if (hasFilters()) {
+            <button (click)="clearFilters()" class="text-xs text-brand hover:underline ml-2">Limpiar</button>
+          }
+        </div>
+
+        <!-- Expense grouped list -->
+        @if (loading()) {
+          <div class="text-center text-mute-soft py-20">Cargando...</div>
+        } @else if (filteredExpenses().length === 0) {
+          <div class="text-center py-20 border border-dashed border-line rounded-2xl">
+            <p class="text-3xl mb-2">🧾</p>
+            <p class="text-sm text-mute">
+              {{ hasFilters() ? 'No hay gastos que coincidan' : 'No hay gastos este mes' }}
+            </p>
+          </div>
+        } @else {
+          <div class="space-y-8">
+            @for (group of expenseGroups(); track group.date) {
+              <div>
+                <div class="flex items-center justify-between mb-3 px-1">
+                  <span class="text-xs font-medium text-mute uppercase tracking-wide">{{ group.label }}</span>
+                  <span class="text-xs text-mute-soft money">$ {{ group.total | number:'1.0-0' }}</span>
+                </div>
+                <div class="border border-line rounded-xl divide-y divide-line overflow-hidden">
+                  @for (expense of group.items; track expense.id) {
+                    <div class="flex items-center justify-between px-5 py-4 hover:bg-slate-50/60 transition-colors group">
+                      <div class="flex items-center gap-3">
+                        <span class="w-8 h-8 rounded-full flex items-center justify-center text-sm shrink-0"
+                              [style.background]="expense.categoryColor + '1A'">{{ expense.categoryIcon }}</span>
+                        <div>
+                          <p class="text-sm text-ink">{{ expense.description || expense.categoryName }}</p>
+                          <p class="text-[11px] text-mute-soft mt-0.5">{{ expense.categoryName }}</p>
+                        </div>
+                      </div>
+                      <div class="flex items-center gap-5">
+                        <span class="text-sm text-ink money">$ {{ expense.amount | number:'1.0-0' }}</span>
+                        <div class="flex items-center gap-3 opacity-0 group-hover:opacity-100 transition-opacity">
+                          <button (click)="editExpense(expense)"
+                                  class="text-xs text-brand hover:underline">Editar</button>
+                          <button (click)="deleteExpense(expense.id)"
+                                  class="text-xs text-red-500 hover:underline">Eliminar</button>
+                        </div>
+                      </div>
+                    </div>
+                  }
+                </div>
+              </div>
+            }
+          </div>
+        }
+
+      </div>
+
+      <!-- Right: filtered summary -->
+      <div class="col-span-12 lg:col-span-4">
+        <h3 class="text-sm font-medium text-ink mb-3">Resumen filtrado</h3>
+        <div class="bg-surface rounded-xl px-5 py-4 space-y-3">
+          <div class="flex items-center justify-between">
+            <span class="text-sm text-ink-soft">Registros</span>
+            <span class="text-sm font-medium text-ink">{{ filteredExpenses().length }}</span>
+          </div>
+          <div class="flex items-center justify-between">
+            <span class="text-sm text-ink-soft">Total</span>
+            <span class="text-sm font-medium text-ink money">$ {{ filteredTotal() | number:'1.0-0' }}</span>
+          </div>
+          <div class="flex items-center justify-between">
+            <span class="text-sm text-ink-soft">Promedio</span>
+            <span class="text-sm font-medium text-ink money">
+              $ {{ (filteredExpenses().length ? filteredTotal() / filteredExpenses().length : 0) | number:'1.0-0' }}
+            </span>
+          </div>
+        </div>
+      </div>
+
+    </div>
   </div>
 </div>
