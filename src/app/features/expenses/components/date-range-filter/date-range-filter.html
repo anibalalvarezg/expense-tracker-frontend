@@ -1,0 +1,26 @@
+<div class="flex flex-wrap items-center gap-2 mb-3">
+  @for (preset of presets; track preset.key) {
+    <app-chip
+      [active]="activePreset() === preset.key"
+      (clicked)="applyPreset(preset.key)">
+      {{ preset.label }}
+    </app-chip>
+  }
+</div>
+
+<div class="flex items-center gap-3 mb-8">
+  <input appInput type="date"
+         [ngModel]="filterFrom()"
+         (ngModelChange)="onFromChange($event)"
+         name="filterFrom"
+         class="max-w-[180px]" />
+  <span class="text-mute-soft text-sm">→</span>
+  <input appInput type="date"
+         [ngModel]="filterTo()"
+         (ngModelChange)="onToChange($event)"
+         name="filterTo"
+         class="max-w-[180px]" />
+  @if (filterFrom() || filterTo()) {
+    <button (click)="cleared.emit()" class="text-xs text-brand hover:underline ml-2">Limpiar</button>
+  }
+</div>

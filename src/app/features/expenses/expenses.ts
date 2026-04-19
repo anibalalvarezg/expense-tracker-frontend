@@ -1,39 +1,38 @@
-import { Component, inject, signal, OnInit, computed } from '@angular/core';
-import { CommonModule } from '@angular/common';
-import { FormsModule } from '@angular/forms';
+import { Component, inject, signal, OnInit, computed, viewChild } from '@angular/core';
+import { DecimalPipe } from '@angular/common';
 import { ExpenseService, ExpenseResponse, ExpenseRequest } from '../../core/services/expense';
 import { CategoryService, Category } from '../../core/services/category';
 import { BtnPrimaryDirective } from '../../shared/directives/btn-primary.directive';
 import { BtnGhostDirective } from '../../shared/directives/btn-ghost.directive';
-import { InputDirective } from '../../shared/directives/input.directive';
-import { FieldComponent } from '../../shared/components/field/field';
 import { ChipComponent } from '../../shared/components/chip/chip';
-import { RowComponent } from '../../shared/components/row/row';
+import { ExpenseFormComponent } from './components/expense-form/expense-form';
+import { DateRangeFilterComponent } from './components/date-range-filter/date-range-filter';
+import { ExpenseListComponent } from './components/expense-list/expense-list';
+import { ExpenseSummaryComponent } from './components/expense-summary/expense-summary';
+import { ExpenseGroup } from './expenses.types';
 
 @Component({
   selector: 'app-expenses',
   standalone: true,
-  imports: [CommonModule, FormsModule, BtnPrimaryDirective, BtnGhostDirective, InputDirective, FieldComponent, ChipComponent, RowComponent],
+  imports: [
+    DecimalPipe, BtnPrimaryDirective, BtnGhostDirective, ChipComponent,
+    ExpenseFormComponent, DateRangeFilterComponent,
+    ExpenseListComponent, ExpenseSummaryComponent
+  ],
   templateUrl: './expenses.html'
 })
 export class Expenses implements OnInit {
   private expenseService = inject(ExpenseService);
   private categoryService = inject(CategoryService);
 
+  private expenseForm = viewChild(ExpenseFormComponent);
+
   expenses = signal<ExpenseResponse[]>([]);
   categories = signal<Category[]>([]);
   loading = signal(true);
   showForm = signal(false);
-  editingId = signal<number | null>(null);
-  error = signal('');
+  editingExpense = signal<ExpenseResponse | null>(null);
 
-  // Form fields
-  amount = signal(0);
-  categoryId = signal(0);
-  description = signal('');
-  date = signal(new Date().toISOString().split('T')[0]);
-
-  // Filters
   filterCategoryId = signal(0);
   filterFrom = signal('');
   filterTo = signal('');
@@ -59,7 +58,7 @@ export class Expenses implements OnInit {
     });
   });
 
-  expenseGroups = computed(() => {
+  expenseGroups = computed<ExpenseGroup[]>(() => {
     const sorted = [...this.filteredExpenses()].sort((a, b) => b.date.localeCompare(a.date));
     const map = new Map<string, ExpenseResponse[]>();
     for (const e of sorted) {
@@ -75,11 +74,24 @@ export class Expenses implements OnInit {
   });
 
   filteredTotal = computed(() => this.filteredExpenses().reduce((s, e) => s + e.amount, 0));
+  filteredAverage = computed(() => {
+    const count = this.filteredExpenses().length;
+    return count ? this.filteredTotal() / count : 0;
+  });
   hasFilters = computed(() => this.filterCategoryId() !== 0 || this.filterFrom() !== '' || this.filterTo() !== '');
 
   ngOnInit() {
+    this.initMtdFilter();
     this.loadExpenses();
     this.loadCategories();
+  }
+
+  private initMtdFilter() {
+    const today = new Date();
+    const fmt = (d: Date) => d.toISOString().split('T')[0];
+    const first = new Date(today.getFullYear(), today.getMonth(), 1);
+    this.filterFrom.set(fmt(first));
+    this.filterTo.set(fmt(today));
   }
 
   loadExpenses() {
@@ -100,45 +112,30 @@ export class Expenses implements OnInit {
   }
 
   openForm() {
-    this.editingId.set(null);
-    this.amount.set(0);
-    this.categoryId.set(0);
-    this.description.set('');
-    this.date.set(new Date().toISOString().split('T')[0]);
-    this.error.set('');
+    this.editingExpense.set(null);
     this.showForm.set(true);
   }
 
   editExpense(expense: ExpenseResponse) {
-    this.editingId.set(expense.id);
-    this.amount.set(expense.amount);
-    this.description.set(expense.description || '');
-    this.date.set(expense.date);
-    const cat = this.categories().find(c => c.name === expense.categoryName);
-    this.categoryId.set(cat?.id || 0);
-    this.error.set('');
+    this.editingExpense.set(expense);
     this.showForm.set(true);
   }
 
-  saveExpense() {
-    this.error.set('');
-    const request: ExpenseRequest = {
-      amount: this.amount(),
-      categoryId: this.categoryId(),
-      description: this.description(),
-      date: this.date()
-    };
-
-    const operation = this.editingId()
-      ? this.expenseService.update(this.editingId()!, request)
+  saveExpense(request: ExpenseRequest) {
+    const editing = this.editingExpense();
+    const operation = editing
+      ? this.expenseService.update(editing.id, request)
       : this.expenseService.create(request);
 
     operation.subscribe({
       next: () => {
         this.showForm.set(false);
+        this.editingExpense.set(null);
         this.loadExpenses();
       },
-      error: (err: any) => this.error.set(err.error?.message || 'Error al guardar')
+      error: (err: any) => {
+        this.expenseForm()?.setError(err.error?.message || 'Error al guardar');
+      }
     });
   }
 
@@ -151,7 +148,7 @@ export class Expenses implements OnInit {
 
   closeForm() {
     this.showForm.set(false);
-    this.error.set('');
+    this.editingExpense.set(null);
   }
 
   clearFilters() {
@@ -183,7 +180,7 @@ export class Expenses implements OnInit {
     });
   }
 
-  formatDay(dateStr: string): string {
+  private formatDay(dateStr: string): string {
     const [, m, d] = dateStr.split('-').map(Number);
     return `${d} ${this.MONTHS[m - 1]}`;
   }

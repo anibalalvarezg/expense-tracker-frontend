@@ -1,0 +1,47 @@
+<div class="border border-line rounded-2xl p-7 mb-10">
+  <h2 class="text-sm font-medium text-ink mb-5">
+    {{ editingExpense() ? 'Editar gasto' : 'Nuevo gasto' }}
+  </h2>
+  @if (error()) {
+    <div class="text-xs text-red-600 mb-4">{{ error() }}</div>
+  }
+  <div class="grid grid-cols-1 md:grid-cols-4 gap-4">
+    <app-field label="Monto">
+      <input appInput type="number"
+             [ngModel]="amount()"
+             (ngModelChange)="amount.set($event)"
+             name="amount"
+             placeholder="0" />
+    </app-field>
+    <app-field label="Categoría">
+      <select appInput
+              [ngModel]="categoryId()"
+              (ngModelChange)="categoryId.set(+$event)"
+              name="categoryId">
+        <option [value]="0">Selecciona categoría</option>
+        @for (cat of categories(); track cat.id) {
+          <option [value]="cat.id">{{ cat.icon }} {{ cat.name }}</option>
+        }
+      </select>
+    </app-field>
+    <app-field label="Descripción">
+      <input appInput type="text"
+             [ngModel]="description()"
+             (ngModelChange)="description.set($event)"
+             name="description"
+             placeholder="Opcional" />
+    </app-field>
+    <app-field label="Fecha">
+      <input appInput type="date"
+             [ngModel]="date()"
+             (ngModelChange)="date.set($event)"
+             name="date" />
+    </app-field>
+  </div>
+  <div class="flex gap-3 mt-6">
+    <button appBtnPrimary (click)="submit()">
+      {{ editingExpense() ? 'Actualizar' : 'Guardar' }}
+    </button>
+    <button appBtnGhost (click)="cancelled.emit()">Cancelar</button>
+  </div>
+</div>

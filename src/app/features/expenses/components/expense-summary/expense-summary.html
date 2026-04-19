@@ -1,0 +1,6 @@
+<h3 class="text-sm font-medium text-ink mb-3">Resumen filtrado</h3>
+<div class="bg-surface rounded-xl px-5 py-4 space-y-3">
+  <app-row label="Registros" [value]="count().toString()" />
+  <app-row label="Total" [value]="'$ ' + (total() | number:'1.0-0')" />
+  <app-row label="Promedio" [value]="'$ ' + (average() | number:'1.0-0')" />
+</div>
